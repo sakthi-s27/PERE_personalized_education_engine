@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PERE - Personalized Education Reasoning Engine</title>
+  <meta name="description"
+    content="An AI education reasoning engine that detects student misconceptions and builds personalized learning paths. Same Answer. Different Mind." />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body class="relative bg-[#07090E] text-slate-100 antialiased selection:bg-cyan-500 selection:text-black">
+
+  <!-- 3D Neural Background Canvas -->
+  <div id="three-canvas-container"></div>
+
+  <!-- Demo Auto-Play Mode Sticky Banner -->
+  <div id="demo-banner"
+    class="hidden fixed top-0 left-0 right-0 z-50 bg-cyan-950/90 border-b border-cyan-500/40 backdrop-blur-md px-6 py-2.5 flex items-center justify-between text-cyan-300 text-sm font-semibold shadow-lg shadow-cyan-500/10">
+    <div class="flex items-center gap-3">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
+      </span>
+      <span id="demo-step-badge">DEMO MODE ACTIVE (1/3) — Analyzing Student A</span>
+    </div>
+    <button onclick="PERE_DemoMode.stop()"
+      class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded-md text-slate-300 transition-all">
+      ✕ Exit Demo Mode
+    </button>
+  </div>
+
+  <!-- Vertical Section Progress Indicator -->
+  <div class="vertical-indicator hidden lg:flex">
+    <div class="indicator-dot active" onclick="document.getElementById('hero').scrollIntoView({behavior:'smooth'})">
+      <span class="indicator-label">01 Hero</span>
+    </div>
+    <div class="indicator-dot" onclick="document.getElementById('section-problem').scrollIntoView({behavior:'smooth'})">
+      <span class="indicator-label">02 Problem</span>
+    </div>
+    <div class="indicator-dot" onclick="document.getElementById('section-student-start').scrollIntoView({behavior:'smooth'})">
+      <span class="indicator-label">03 Student Start</span>
+    </div>
+    <div class="indicator-dot" onclick="document.getElementById('section-demo').scrollIntoView({behavior:'smooth'})">
+      <span class="indicator-label">04 Core Demo</span>
+    </div>
+    <div class="indicator-dot" onclick="document.getElementById('section-student-guide').scrollIntoView({behavior:'smooth'})">
+      <span class="indicator-label">04 Student Start Guide</span>
+    </div>
+    <div class="indicator-dot" onclick="document.getElementById('section-live-ai').scrollIntoView({behavior:'smooth'})">
+      <span class="indicator-label">05 Live AI Telemetry</span>
+    </div>
+    <div class="indicator-dot" onclick="document.getElementById('section-3d-map').scrollIntoView({behavior:'smooth'})">
+      <span class="indicator-label">06 3D Misconception Map</span>
+    </div>
+    <div class="indicator-dot"
+      onclick="document.getElementById('section-fingerprint').scrollIntoView({behavior:'smooth'})">
+      <span class="indicator-label">07 Fingerprint Radar</span>
+    </div>
+    <div class="indicator-dot"
+      onclick="document.getElementById('section-learning-path').scrollIntoView({behavior:'smooth'})">
+      <span class="indicator-label">08 Learning Path</span>
+    </div>
+    <div class="indicator-dot"
+      onclick="document.getElementById('section-practice').scrollIntoView({behavior:'smooth'})">
+      <span class="indicator-label">09 Adaptive Practice</span>
+    </div>
+    <div class="indicator-dot" onclick="document.getElementById('section-impact').scrollIntoView({behavior:'smooth'})">
+      <span class="indicator-label">10 Impact (Before vs After)</span>
+    </div>
+    <div class="indicator-dot"
+      onclick="document.getElementById('section-student-dash').scrollIntoView({behavior:'smooth'})">
+      <span class="indicator-label">11 Student Intelligence</span>
+    </div>
+    <div class="indicator-dot"
+      onclick="document.getElementById('section-teacher-dash').scrollIntoView({behavior:'smooth'})">
+      <span class="indicator-label">12 Teacher Intelligence</span>
+    </div>
+    <div class="indicator-dot"
+      onclick="document.getElementById('section-architecture').scrollIntoView({behavior:'smooth'})">
+      <span class="indicator-label">13 Architecture & Research</span>
+    </div>
+  </div>
+
+  <!-- Top Glass Navigation Bar -->
+  <header class="fixed top-0 left-0 right-0 z-40 glass-nav px-6 lg:px-12 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+
+      <!-- Brand Logo -->
+      <a href="#hero" class="flex items-center gap-3 group">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-black font-black text-xl shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+          P
+        </div>
+        <div class="flex flex-col">
+          <span class="font-heading font-black text-xl tracking-wider text-white">PERE</span>
+          <span class="text-[0.65rem] font-mono text-cyan-400 tracking-widest -mt-1">REASONING ENGINE</span>
+        </div>
+      </a>
+
+      <!-- Quick Section Jump Links -->
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+        <a href="#section-problem" class="nav-link hover:text-cyan-400 transition-colors">Problem</a>
+        <a href="#section-student-start" class="nav-link hover:text-cyan-400 transition-colors">Start</a>
+        <a href="#section-demo" class="nav-link hover:text-cyan-400 transition-colors">Demo</a>
+        <a href="#section-live-ai" class="nav-link hover:text-cyan-400 transition-colors">AI Telemetry</a>
+        <a href="#section-3d-map" class="nav-link hover:text-cyan-400 transition-colors">3D Map</a>
+        <a href="#section-learning-path" class="nav-link hover:text-cyan-400 transition-colors">Path</a>
+        <a href="#section-student-dash" class="nav-link hover:text-cyan-400 transition-colors">Analytics</a>
+        <a href="#section-architecture" class="nav-link hover:text-cyan-400 transition-colors">Research</a>
+      </nav>
+
+      <!-- CTA Buttons -->
+      <div class="flex items-center gap-4">
+        <button id="btn-enter-demo" onclick="PERE_DemoMode.toggle()"
+          class="btn-demo-pulse px-5 py-2.5 rounded-xl font-heading font-bold text-xs uppercase tracking-wider bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black shadow-lg shadow-cyan-500/25 transition-all">
+          🚀 ENTER DEMO MODE
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="relative pt-24 space-y-32">
+
+    <!-- ================= 01. HERO SECTION ================= -->
+    <section id="hero"
+      class="min-h-[85vh] flex items-center justify-center px-6 max-w-7xl mx-auto text-center relative">
+      <div class="space-y-8 max-w-4xl">
+        <div
+          class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-950/30 backdrop-blur-md text-cyan-400 text-xs font-semibold uppercase tracking-widest">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          AI-POWERED MISCONCEPTION DETECTION
+        </div>
+
+        <h1 class="font-heading font-extrabold text-5xl sm:text-7xl lg:text-8xl tracking-tight text-white leading-none">
+          SAME ANSWER.<br />
+          <span class="text-gradient-cyan">DIFFERENT MIND.</span>
+        </h1>
+
+        <p class="text-lg sm:text-2xl text-slate-300 max-w-2xl mx-auto font-light leading-relaxed">
+          PERE analyzes the reasoning behind an answer, identifies the root misconception, and adapts the next learning step.
+        </p>
+
+        <!-- Learning Signal Pills -->
+        <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <span class="badge-pill signal-pill" data-signal="fractions">Fractions</span>
+          <span class="badge-pill signal-pill" data-signal="algebra">Algebra</span>
+          <span class="badge-pill signal-pill" data-signal="reasoning">Reasoning</span>
+          <span class="badge-pill signal-pill" data-signal="concept">Concept</span>
+          <span class="badge-pill signal-pill" data-signal="learning">Learning</span>
+          <span class="badge-pill signal-pill" data-signal="mastery">Mastery</span>
+        </div>
+
+        <div class="hero-flow-grid">
+          <div class="hero-flow-node"><span>01</span><strong>Answer</strong><small>What the student entered</small></div>
+          <div class="hero-flow-arrow">→</div>
+          <div class="hero-flow-node"><span>02</span><strong>Reasoning</strong><small>How they got there</small></div>
+          <div class="hero-flow-arrow">→</div>
+          <div class="hero-flow-node"><span>03</span><strong>Misconception</strong><small>What is actually wrong</small></div>
+          <div class="hero-flow-arrow">→</div>
+          <div class="hero-flow-node"><span>04</span><strong>Intervention</strong><small>What to learn next</small></div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
+          <a href="#section-demo"
+            class="w-full sm:w-auto px-8 py-4 rounded-xl font-heading font-bold text-sm bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black shadow-xl shadow-cyan-500/20 transition-all transform hover:-translate-y-0.5">
+            ▶ Start as a Student
+          </a>
+          <a href="#section-live-ai"
+            class="w-full sm:w-auto px-8 py-4 rounded-xl font-heading font-bold text-sm glass-panel hover:border-cyan-400/50 text-white transition-all">
+            Watch AI Reasoning →
+          </a>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= 02. PROBLEM SECTION ================= -->
+    <section id="section-problem" class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+        <h2 class="font-heading font-bold text-4xl sm:text-5xl text-white">
+          Right or Wrong Isn't Enough.
+        </h2>
+        <p class="text-slate-400 text-lg">
+          Traditional learning platforms evaluate binary answers. PERE uncovers the cognitive process behind them.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Traditional System Card -->
+        <div class="glass-panel p-8 space-y-6 border-rose-500/20 relative overflow-hidden">
+          <div class="text-xs font-mono font-bold text-rose-400 uppercase tracking-widest">Traditional AI System</div>
+          <div class="space-y-4 text-center py-8">
+            <div class="text-3xl font-mono font-bold text-slate-300">2/3 + 1/3 = 3/6</div>
+            <div
+              class="inline-block bg-rose-950/60 border border-rose-500/40 text-rose-400 font-bold px-6 py-2 rounded-full text-lg">
+              ❌ Wrong Answer
+            </div>
+            <p class="text-slate-500 text-sm italic">Result: "Try again or read solution." (No root cause identified)
+            </p>
+          </div>
+        </div>
+
+        <!-- PERE System Card -->
+        <div
+          class="glass-panel p-8 space-y-6 border-glow-cyan relative overflow-hidden bg-gradient-to-b from-cyan-950/20 to-transparent">
+          <div class="text-xs font-mono font-bold text-cyan-400 uppercase tracking-widest">PERE Reasoning Engine</div>
+          <div
+            class="flex items-center justify-between text-xs font-mono text-slate-300 py-2 border-b border-slate-800">
+            <span>ANSWER: 3/6</span>
+            <span class="text-cyan-400">&rarr; REASONING ANALYZED</span>
+            <span class="text-amber-400">&rarr; MISCONCEPTION MATCHED</span>
+          </div>
+          <div class="space-y-3">
+            <div class="p-3 rounded-lg bg-slate-900/80 border border-cyan-500/30 text-xs font-mono text-cyan-300">
+              🧠 Root Cause: Independent Numerator/Denominator Addition
+            </div>
+            <div class="p-3 rounded-lg bg-slate-900/80 border border-purple-500/30 text-xs font-mono text-purple-300">
+              🎯 Intervention: Visual Quantity Partitioning Roadmap
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= 03. STUDENT START HERE ================= -->
+    <section id="section-student-start" class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-10 space-y-4">
+        <div class="inline-block text-xs font-mono text-emerald-400 font-bold uppercase tracking-widest px-3 py-1 rounded bg-emerald-950/40 border border-emerald-500/30">STUDENT MODE</div>
+        <h2 class="font-heading font-black text-4xl sm:text-5xl text-white">What should a student do?</h2>
+        <p class="text-slate-400 text-lg">PERE guides the learner from the first wrong answer to measurable mastery. No guesswork about what to do next.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <button class="student-step-card glass-panel p-6 text-left border-glow-cyan" data-scroll-target="section-demo">
+          <div class="step-no">01</div><h3>Choose a Concept</h3><p>Select Fractions or Algebra and start a quick diagnostic.</p><span>Start diagnostic →</span>
+        </button>
+        <button class="student-step-card glass-panel p-6 text-left" data-scroll-target="section-live-ai">
+          <div class="step-no">02</div><h3>Show Your Thinking</h3><p>Submit the answer and explain how you reached it. PERE reads the reasoning.</p><span>Analyze my reasoning →</span>
+        </button>
+        <button class="student-step-card glass-panel p-6 text-left" data-scroll-target="section-learning-path">
+          <div class="step-no">03</div><h3>Follow Your Path</h3><p>Get a learning sequence selected for your actual misconception, not just your score.</p><span>Open learning path →</span>
+        </button>
+        <button class="student-step-card glass-panel p-6 text-left" data-scroll-target="section-practice">
+          <div class="step-no">04</div><h3>Practice → Recheck</h3><p>Difficulty adapts after each response until the misconception is resolved.</p><span>Try adaptive practice →</span>
+        </button>
+      </div>
+      <div id="topic-preview" class="glass-panel p-6 mt-6 border border-cyan-500/20">
+        <div class="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
+          <div><span class="text-xs font-mono text-cyan-400 uppercase tracking-wider">CURRENT LEARNING DOMAIN</span>
+            <h3 id="topic-title" class="font-heading text-2xl font-bold text-white mt-1">Fractions · Addition & Representation</h3>
+            <p id="topic-description" class="text-sm text-slate-400 mt-2 max-w-2xl">Diagnose whether the learner confuses numerator/denominator rules, the part-to-whole model, or simple calculation execution.</p>
+          </div>
+          <div class="grid grid-cols-3 gap-3 min-w-[280px]">
+            <div class="topic-stat"><span>Concept</span><strong id="topic-concept-score">55%</strong></div>
+            <div class="topic-stat"><span>Reasoning</span><strong id="topic-reasoning-score">60%</strong></div>
+            <div class="topic-stat"><span>Mastery</span><strong id="topic-mastery-score">48%</strong></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 03. CORE DEMO SECTION ================= -->
+    <section id="section-demo" class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-12 space-y-4">
+        <div
+          class="inline-block text-xs font-mono text-cyan-400 font-bold uppercase tracking-widest px-3 py-1 rounded bg-cyan-950/50 border border-cyan-500/30">
+          THE CORE PARADIGM
+        </div>
+        <h2 class="font-heading font-black text-4xl sm:text-6xl text-white">
+          SAME ANSWER. <span class="text-gradient-cyan">DIFFERENT MIND.</span>
+        </h2>
+        <div class="glass-panel p-6 inline-block text-center max-w-md mx-auto my-4 border-glow-cyan">
+          <span class="text-xs font-mono text-slate-400 block mb-1">UNIVERSAL TEST QUESTION</span>
+          <span class="font-heading font-bold text-2xl text-cyan-300">"What is 2/3 + 1/3?"</span>
+          <span class="block text-sm font-mono text-rose-400 mt-1">All 3 Students Answered: "3/6"</span>
+        </div>
+      </div>
+
+      <!-- 3 Interactive Student Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Student A -->
+        <div id="card-student-a" class="student-card glass-panel p-6 space-y-4 border-glow-cyan active-student">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 rounded-full bg-cyan-500/20 border border-cyan-400 flex items-center justify-center font-bold text-cyan-300">
+                A</div>
+              <div>
+                <h3 class="font-heading font-bold text-white">Student A (Alex)</h3>
+                <span class="text-xs text-cyan-400 font-mono">Rule Error</span>
+              </div>
+            </div>
+            <span class="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-mono">3/6</span>
+          </div>
+          <p class="text-xs text-slate-300 bg-slate-900/80 p-3 rounded-lg border border-slate-800 italic">
+            "I added the numerator and denominator separately: (2+1)/(3+3) = 3/6."
+          </p>
+          <div class="space-y-1 text-xs">
+            <div class="text-slate-400 font-semibold">Diagnosis:</div>
+            <div class="text-cyan-300 font-medium">Procedural / Rule Application Error</div>
+          </div>
+        </div>
+
+        <!-- Student B -->
+        <div id="card-student-b" class="student-card glass-panel p-6 space-y-4 border-slate-800">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center font-bold text-amber-300">
+                B</div>
+              <div>
+                <h3 class="font-heading font-bold text-white">Student B (Bianca)</h3>
+                <span class="text-xs text-amber-400 font-mono">Conceptual</span>
+              </div>
+            </div>
+            <span class="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-mono">3/6</span>
+          </div>
+          <p class="text-xs text-slate-300 bg-slate-900/80 p-3 rounded-lg border border-slate-800 italic">
+            "I thought fractions are added by combining top and bottom numbers into a new fraction."
+          </p>
+          <div class="space-y-1 text-xs">
+            <div class="text-slate-400 font-semibold">Diagnosis:</div>
+            <div class="text-amber-300 font-medium">Conceptual Misconception</div>
+          </div>
+        </div>
+
+        <!-- Student C -->
+        <div id="card-student-c" class="student-card glass-panel p-6 space-y-4 border-slate-800">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 rounded-full bg-purple-500/20 border border-purple-400 flex items-center justify-center font-bold text-purple-300">
+                C</div>
+              <div>
+                <h3 class="font-heading font-bold text-white">Student C (Chris)</h3>
+                <span class="text-xs text-purple-400 font-mono">Calculation</span>
+              </div>
+            </div>
+            <span class="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-mono">3/6</span>
+          </div>
+          <p class="text-xs text-slate-300 bg-slate-900/80 p-3 rounded-lg border border-slate-800 italic">
+            "I understood the rule but accidentally calculated the denominator incorrectly."
+          </p>
+          <div class="space-y-1 text-xs">
+            <div class="text-slate-400 font-semibold">Diagnosis:</div>
+            <div class="text-purple-300 font-medium">Calculation Error</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ================= 04. STUDENT START GUIDE ================= -->
+    <section id="section-student-guide" class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-10 space-y-3">
+        <span class="text-xs font-mono text-emerald-400 font-bold uppercase tracking-widest">START HERE — STUDENT MODE</span>
+        <h2 class="font-heading font-black text-4xl sm:text-5xl text-white">Not sure what to do? <span class="text-gradient-cyan">Just follow the signal.</span></h2>
+        <p class="text-slate-400">Choose a problem, explain your reasoning, get a diagnosis, and let PERE decide what you should learn next.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
+        <button class="student-action-card glass-panel p-5 text-left" onclick="document.getElementById('section-demo').scrollIntoView({behavior:'smooth'})">
+          <span class="step-orb">01</span><h3 class="font-heading font-bold text-lg text-white mt-4">Pick a Problem</h3><p class="text-xs text-slate-400 mt-2">Start with the live fraction challenge.</p>
+        </button>
+        <button class="student-action-card glass-panel p-5 text-left" onclick="document.getElementById('section-live-ai').scrollIntoView({behavior:'smooth'})">
+          <span class="step-orb">02</span><h3 class="font-heading font-bold text-lg text-white mt-4">Explain Your Thinking</h3><p class="text-xs text-slate-400 mt-2">Your reasoning is the key diagnostic signal.</p>
+        </button>
+        <button class="student-action-card glass-panel p-5 text-left" onclick="document.getElementById('section-3d-map').scrollIntoView({behavior:'smooth'})">
+          <span class="step-orb">03</span><h3 class="font-heading font-bold text-lg text-white mt-4">Inspect Your Map</h3><p class="text-xs text-slate-400 mt-2">See the concept → error → root cause chain in 3D.</p>
+        </button>
+        <button class="student-action-card glass-panel p-5 text-left" onclick="document.getElementById('section-learning-path').scrollIntoView({behavior:'smooth'})">
+          <span class="step-orb">04</span><h3 class="font-heading font-bold text-lg text-white mt-4">Follow Your Path</h3><p class="text-xs text-slate-400 mt-2">Practice the exact skill that needs attention.</p>
+        </button>
+      </div>
+
+      <div class="glass-panel p-6 border-glow-cyan">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div>
+            <span class="text-xs font-mono text-cyan-400 uppercase tracking-widest">LIVE LEARNING SIGNALS</span>
+            <h3 class="font-heading font-bold text-2xl text-white mt-1">Your current concept pulse</h3>
+            <p class="text-sm text-slate-400 mt-1">Click a student above to see how the same answer changes the diagnosis and path.</p>
+          </div>
+          <div id="student-signal-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 w-full lg:w-auto">
+            <!-- Injected by app.js -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 04. LIVE AI REASONING TELEMETRY ================= -->
+    <section id="section-live-ai" class="max-w-7xl mx-auto px-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+
+        <!-- Console Telemetry -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-heading font-bold text-2xl text-white">Live AI Diagnostic Telemetry</h3>
+            <button id="btn-trigger-ai"
+              class="px-4 py-2 rounded-lg bg-cyan-950 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-bold transition-all">
+              ✨ Trigger AI Re-Analysis
+            </button>
+          </div>
+          <div id="ai-telemetry-console" class="ai-console">
+            <div class="console-line"><span class="console-time">&gt;</span> <span>[SYSTEM READY] Listening for student
+                reasoning updates...</span></div>
+          </div>
+        </div>
+
+        <!-- Structured Output Card -->
+        <div id="ai-diagnosis-card" class="glass-panel p-8 space-y-6 border-glow-cyan transition-all">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+              <span class="text-xs font-mono text-cyan-400 font-bold uppercase tracking-wider block">STRUCTURED AI
+                DIAGNOSIS</span>
+              <h4 id="diag-title" class="font-heading font-bold text-2xl text-white">Independent Numerator/Denominator
+                Addition</h4>
+            </div>
+            <span id="diag-type"
+              class="px-3 py-1 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-500/30 text-xs font-mono">
+              Procedural Error
+            </span>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-xs text-slate-400 mb-1">
+                <span>Diagnostic Confidence</span>
+                <span id="diag-confidence" class="font-mono text-cyan-400 font-bold">94%</span>
+              </div>
+              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div id="diag-confidence-bar" class="bg-cyan-400 h-full rounded-full transition-all duration-500"
+                  style="width: 94%;"></div>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <span class="text-xs font-mono text-slate-400 uppercase tracking-wider block">Root Cause Analysis</span>
+              <p id="diag-root-cause"
+                class="text-sm text-slate-200 bg-slate-900/60 p-4 rounded-xl border border-slate-800 font-mono">
+                Over-generalization of whole-number addition rules to fractions.
+              </p>
+            </div>
+
+            <div class="space-y-2">
+              <span class="text-xs font-mono text-slate-400 uppercase tracking-wider block">Pedagogical Evidence</span>
+              <p id="diag-evidence" class="text-sm text-slate-300 leading-relaxed">
+                Explanation reveals student treats numerators and denominators as independent, uncoupled integers.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ================= 05. 3D MISCONCEPTION MAP ================= -->
+    <section id="section-3d-map" class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-8 space-y-3">
+        <h2 class="font-heading font-bold text-4xl text-white">From Error to Root Cause</h2>
+        <p class="text-slate-400 text-sm">
+          Interactive 3D Knowledge Node Topology. Drag to rotate, scroll to zoom, click nodes to inspect.
+        </p>
+      </div>
+
+      <div class="glass-panel p-2 relative">
+        <div id="misconception-map-3d"></div>
+        <div id="map-node-info"
+          class="absolute bottom-6 left-6 right-6 text-center text-xs font-mono text-cyan-300 bg-slate-950/80 p-3 rounded-xl border border-slate-800 backdrop-blur-md">
+          <em>Hover or click nodes to inspect cognitive pipeline...</em>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= 06. MISCONCEPTION FINGERPRINT ================= -->
+    <section id="section-fingerprint" class="max-w-7xl mx-auto px-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+        <div class="space-y-6">
+          <div class="inline-block text-xs font-mono text-cyan-400 font-bold uppercase tracking-widest">
+            STUDENT PROFILE DIAGNOSTIC
+          </div>
+          <h2 class="font-heading font-bold text-4xl text-white">Misconception Fingerprint</h2>
+          <p class="text-slate-300 leading-relaxed">
+            Every student possesses a unique cognitive profile. PERE maps understanding across 6 critical dimensions to
+            isolate exact learning bottlenecks.
+          </p>
+
+          <div class="glass-panel p-6 space-y-3 border-glow-cyan">
+            <span class="text-xs font-mono text-slate-400 uppercase tracking-wider block">PRIMARY BOTTLENECK</span>
+            <div id="fingerprint-weakest-label" class="font-heading font-bold text-xl text-rose-400">Formula Application
+            </div>
+            <p id="fingerprint-analysis-text" class="text-xs text-slate-300 font-mono">
+              The student understands the general concept but struggles with proper rule execution under multi-step
+              problems.
+            </p>
+          </div>
+        </div>
+
+        <div class="glass-panel p-6 flex items-center justify-center border-glow-cyan">
+          <canvas id="fingerprint-radar-canvas"></canvas>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ================= 07. PERSONALIZED LEARNING PATH ================= -->
+    <section id="section-learning-path" class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
+        <h2 class="font-heading font-bold text-4xl text-white">Your Learning Path</h2>
+        <p class="text-slate-400 text-sm">
+          Dynamically generated 6-step roadmap tailored specifically to the diagnosed root cause.
+        </p>
+      </div>
+
+      <div id="learning-path-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Injected dynamically via app.js -->
+      </div>
+    </section>
+
+
+    <!-- ================= 08. ADAPTIVE PRACTICE ================= -->
+    <section id="section-practice" class="max-w-4xl mx-auto px-6">
+      <div class="glass-panel p-8 lg:p-12 space-y-8 border-glow-cyan relative overflow-hidden">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-6">
+          <div>
+            <span class="text-xs font-mono text-cyan-400 font-bold uppercase tracking-wider">TARGETED ADAPTIVE
+              PRACTICE</span>
+            <h3 class="font-heading font-bold text-2xl text-white">Root Cause Remediation Drill</h3>
+          </div>
+          <span id="adaptive-difficulty-badge" class="badge-pill">
+            DIFFICULTY: MEDIUM
+          </span>
+        </div>
+
+        <div class="space-y-6">
+          <h4 id="practice-question-text" class="font-heading font-bold text-xl text-cyan-300">
+            Calculate: 3/8 + 2/8
+          </h4>
+
+          <div id="practice-options-container" class="space-y-3">
+            <!-- Injected via app.js -->
+          </div>
+
+          <div id="practice-feedback-box" class="hidden"></div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= 09. BEFORE VS AFTER ================= -->
+    <section id="section-impact" class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
+        <h2 class="font-heading font-bold text-4xl sm:text-5xl text-white">Learning Actually Happened.</h2>
+        <p class="text-slate-400">Measurable impact of targeted misconception remediation versus traditional repetition.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Before -->
+        <div class="glass-panel p-8 space-y-6 border-rose-500/30 bg-rose-950/10">
+          <div class="text-xs font-mono font-bold text-rose-400 uppercase tracking-wider">BEFORE INTERVENTION</div>
+          <div class="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div id="metric-before-mastery" class="font-heading font-bold text-3xl text-rose-400">48%</div>
+              <div class="text-xs text-slate-400">Mastery</div>
+            </div>
+            <div>
+              <div id="metric-before-risk" class="font-heading font-bold text-3xl text-rose-400">HIGH</div>
+              <div class="text-xs text-slate-400">Error Risk</div>
+            </div>
+            <div>
+              <div id="metric-before-acc" class="font-heading font-bold text-3xl text-rose-400">42%</div>
+              <div class="text-xs text-slate-400">Accuracy</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- After -->
+        <div class="glass-panel p-8 space-y-6 border-glow-emerald bg-emerald-950/10">
+          <div class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">AFTER INTERVENTION</div>
+          <div class="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div id="metric-after-mastery" class="font-heading font-bold text-3xl text-emerald-400">88%</div>
+              <div class="text-xs text-slate-400">Mastery</div>
+            </div>
+            <div>
+              <div id="metric-after-risk" class="font-heading font-bold text-3xl text-emerald-400">LOW</div>
+              <div class="text-xs text-slate-400">Error Risk</div>
+            </div>
+            <div>
+              <div id="metric-after-acc" class="font-heading font-bold text-3xl text-emerald-400">92%</div>
+              <div class="text-xs text-slate-400">Accuracy</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= 10 & 11. STUDENT & TEACHER INTELLIGENCE ================= -->
+    <section id="section-student-dash" class="max-w-7xl mx-auto px-6 space-y-12">
+
+      <!-- Student Dashboard -->
+      <div>
+        <div class="mb-6">
+          <span class="text-xs font-mono text-cyan-400 font-bold uppercase tracking-wider">STUDENT INTELLIGENCE</span>
+          <h2 class="font-heading font-bold text-3xl text-white">Mastery Analytics & Streaks</h2>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="glass-panel p-6 flex flex-col justify-between space-y-4">
+            <div class="space-y-1">
+              <span class="text-xs text-slate-400">Overall Concept Mastery</span>
+              <div class="font-heading font-bold text-4xl text-cyan-400">88.4%</div>
+            </div>
+            <div class="space-y-1">
+              <span class="text-xs text-slate-400">Learning Streak</span>
+              <div class="font-heading font-bold text-2xl text-amber-400">🔥 7 Days Active</div>
+            </div>
+          </div>
+          <div class="glass-panel p-6 lg:col-span-2">
+            <span class="text-xs text-slate-400 font-mono block mb-2">MASTERY GROWTH OVER TIME</span>
+            <canvas id="mastery-area-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Teacher Dashboard -->
+      <div id="section-teacher-dash">
+        <div class="mb-6">
+          <span class="text-xs font-mono text-purple-400 font-bold uppercase tracking-wider">TEACHER INTELLIGENCE</span>
+          <h2 class="font-heading font-bold text-3xl text-white">Class Misconception Heatmap</h2>
+        </div>
+
+        <div class="glass-panel p-6 space-y-4 overflow-x-auto">
+          <div class="heatmap-grid min-w-[600px]">
+            <div class="text-xs font-mono text-slate-400 p-2">STUDENT GROUP</div>
+            <div class="text-xs font-mono text-slate-400 p-2 text-center">FRACTIONS</div>
+            <div class="text-xs font-mono text-slate-400 p-2 text-center">ALGEBRA</div>
+            <div class="text-xs font-mono text-slate-400 p-2 text-center">GEOMETRY</div>
+
+            <div class="text-sm font-semibold text-slate-200 p-2">Group A (Grade 6)</div>
+            <div class="heatmap-cell heat-high">HIGH RISK (42%)</div>
+            <div class="heatmap-cell heat-medium">MEDIUM (18%)</div>
+            <div class="heatmap-cell heat-low">LOW (4%)</div>
+
+            <div class="text-sm font-semibold text-slate-200 p-2">Group B (Grade 7)</div>
+            <div class="heatmap-cell heat-medium">MEDIUM (22%)</div>
+            <div class="heatmap-cell heat-high">HIGH RISK (38%)</div>
+            <div class="heatmap-cell heat-low">LOW (8%)</div>
+
+            <div class="text-sm font-semibold text-slate-200 p-2">Group C (Grade 8)</div>
+            <div class="heatmap-cell heat-low">LOW (6%)</div>
+            <div class="heatmap-cell heat-medium">MEDIUM (15%)</div>
+            <div class="heatmap-cell heat-medium">MEDIUM (19%)</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- ================= 12. CLOSED LOOP + DIFFERENTIATOR ================= -->
+    <section id="section-loop" class="max-w-7xl mx-auto px-6 space-y-12">
+      <div class="text-center max-w-3xl mx-auto space-y-3">
+        <span class="text-xs font-mono text-emerald-400 font-bold uppercase tracking-wider">CLOSED LEARNING LOOP</span>
+        <h2 class="font-heading font-bold text-4xl sm:text-5xl text-white">PERE Doesn't Stop at Diagnosis.</h2>
+        <p class="text-slate-400">The engine re-evaluates the learner and changes the intervention when the misconception survives.</p>
+      </div>
+      <div class="learning-loop glass-panel p-6 sm:p-10">
+        <div class="loop-node active"><span>01</span><strong>DIAGNOSE</strong><small>Reasoning + error pattern</small></div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-node"><span>02</span><strong>TEACH</strong><small>Root-cause explanation</small></div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-node"><span>03</span><strong>PRACTICE</strong><small>Adaptive difficulty</small></div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-node"><span>04</span><strong>RE-EVALUATE</strong><small>New evidence</small></div>
+        <div class="loop-decision">MASTERY REACHED?<br><span>YES → NEXT CONCEPT</span><span>NO → DIFFERENT INTERVENTION</span></div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass-panel p-7 border border-rose-500/20">
+          <span class="text-xs font-mono text-rose-400 uppercase">TRADITIONAL AI</span>
+          <div class="compare-flow bad-flow"><span>Wrong Answer</span><b>↓</b><span>Generic Feedback</span><b>↓</b><span>Try Again</span></div>
+        </div>
+        <div class="glass-panel p-7 border-glow-emerald">
+          <span class="text-xs font-mono text-emerald-400 uppercase">PERE</span>
+          <div class="compare-flow good-flow"><span>Wrong Answer</span><b>↓</b><span>Reasoning Analysis</span><b>↓</b><span>Root Cause</span><b>↓</b><span>Personalized Intervention</span><b>↓</b><span>Practice → Re-evaluate → Mastery</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 12. ARCHITECTURE & RESEARCH ================= -->
+    <section id="section-architecture" class="max-w-7xl mx-auto px-6 space-y-16">
+
+      <!-- AI Architecture Dataflow -->
+      <div class="space-y-6">
+        <div class="text-center max-w-2xl mx-auto">
+          <span class="text-xs font-mono text-cyan-400 font-bold uppercase tracking-wider">SYSTEM PIPELINE</span>
+          <h2 class="font-heading font-bold text-4xl text-white">AI Engine Architecture</h2>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="glass-panel p-4 text-center space-y-1">
+            <span class="text-xs font-mono text-cyan-400">01. INPUT</span>
+            <div class="font-heading font-bold text-white">Student Reasoning</div>
+          </div>
+          <div class="glass-panel p-4 text-center space-y-1">
+            <span class="text-xs font-mono text-cyan-400">02. ENGINE</span>
+            <div class="font-heading font-bold text-white">Express / LLM</div>
+          </div>
+          <div class="glass-panel p-4 text-center space-y-1">
+            <span class="text-xs font-mono text-cyan-400">03. CLASSIFIER</span>
+            <div class="font-heading font-bold text-white">Misconception Model</div>
+          </div>
+          <div class="glass-panel p-4 text-center space-y-1">
+            <span class="text-xs font-mono text-cyan-400">04. OUTPUT</span>
+            <div class="font-heading font-bold text-white">Adaptive Path</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-panel p-7 border border-cyan-500/20">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-center">
+          <div><div class="metric-icon">🧠</div><h3 class="font-heading font-bold text-white">Reasoning-aware</h3><p class="text-xs text-slate-400">Uses explanation evidence, not only final answers.</p></div>
+          <div><div class="metric-icon">🎯</div><h3 class="font-heading font-bold text-white">Intervention-aware</h3><p class="text-xs text-slate-400">Maps each misconception to a different teaching path.</p></div>
+          <div><div class="metric-icon">📈</div><h3 class="font-heading font-bold text-white">Outcome-aware</h3><p class="text-xs text-slate-400">Measures whether the learner actually recovers.</p></div>
+        </div>
+      </div>
+
+      <!-- Final Hackathon Call To Action & Zip Export -->
+      <div
+        class="glass-panel p-12 text-center space-y-8 border-glow-cyan bg-gradient-to-b from-cyan-950/30 to-transparent">
+        <h2 class="font-heading font-black text-4xl sm:text-6xl text-white">
+          "We don't just detect wrong answers.<br />
+          <span class="text-gradient-cyan">We understand the wrong thinking behind them."</span>
+        </h2>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+          <button onclick="PERE_DemoMode.start()"
+            class="w-full sm:w-auto px-8 py-4 rounded-xl font-heading font-bold text-sm bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black shadow-xl shadow-cyan-500/20 transition-all">
+            🚀 Launch Judge Demo Mode
+          </button>
+          <a href="#section-student-start"
+            class="w-full sm:w-auto px-8 py-4 rounded-xl font-heading font-bold text-sm glass-panel hover:border-cyan-400/50 text-cyan-300 transition-all flex items-center justify-center gap-2">
+            <span>🧭 Start as a Student</span>
+          </a>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Node Detail Modal -->
+  <div id="node-detail-modal"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
+    <div class="glass-panel max-w-lg w-full p-8 space-y-6 border-glow-cyan">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <span id="modal-node-type" class="text-xs font-mono text-cyan-400 block font-bold">NODE CATEGORY</span>
+          <h3 id="modal-node-title" class="font-heading font-bold text-2xl text-white">Node Details</h3>
+        </div>
+        <button id="btn-close-modal" class="text-slate-400 hover:text-white font-mono text-lg">✕</button>
+      </div>
+      <p id="modal-node-desc"
+        class="text-slate-300 text-sm leading-relaxed font-mono bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+        Node details description...
+      </p>
+    </div>
+  </div>
+
+  <footer class="text-center py-12 text-slate-500 text-xs font-mono border-t border-slate-900 mt-24">
+    PERE — Personalized Education Reasoning Engine &copy; 2026. Built for Hackathons & Next-Gen Education.
+  </footer>
+
+  <!-- Application Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/three-background.js"></script>
+  <script src="js/three-misconception.js"></script>
+  <script src="js/ai-engine.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/demo-mode.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+
+</html>
