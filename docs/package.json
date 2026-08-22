@@ -1,0 +1,26 @@
+{
+  "name": "personalized-education-reasoning-engine",
+  "version": "2.0.0",
+  "description": "PERE - AI Education Reasoning Engine that detects misconceptions and builds personalized learning paths.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "zip": "python zip_project.py"
+  },
+  "keywords": [
+    "education",
+    "ai-reasoning",
+    "misconception-detection",
+    "adaptive-learning",
+    "threejs",
+    "hackathon"
+  ],
+  "author": "PERE AI Team",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}
